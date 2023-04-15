@@ -1479,6 +1479,14 @@ static DWORD device_type_for_version( DWORD type, DWORD version )
     }
 }
 
+static void replace_copyright_symbol(WCHAR * str)
+{
+    while ((str = wcschr(str, L'\u00A9')) != NULL)
+    {
+        *str = L'c';
+    }
+}
+
 static HRESULT hid_joystick_device_try_open( UINT32 handle, const WCHAR *path, HANDLE *device,
                                              PHIDP_PREPARSED_DATA *preparsed, HIDD_ATTRIBUTES *attrs,
                                              HIDP_CAPS *caps, DIDEVICEINSTANCEW *instance, DWORD version )
@@ -1513,6 +1521,11 @@ static HRESULT hid_joystick_device_try_open( UINT32 handle, const WCHAR *path, H
 
     if (!HidD_GetProductString( device_file, instance->tszInstanceName, MAX_PATH * sizeof(WCHAR) )) goto failed;
     if (!HidD_GetProductString( device_file, instance->tszProductName, MAX_PATH * sizeof(WCHAR) )) goto failed;
+    TRACE("Replacing copyright symbol in %s", debugstr_w(instance->tszInstanceName));
+    replace_copyright_symbol(instance->tszInstanceName);
+    TRACE("Replaced copyright symbol in %s", debugstr_w(instance->tszInstanceName));
+    replace_copyright_symbol(instance->tszProductName);
+    
 
     instance->guidInstance = hid_joystick_guid;
     instance->guidInstance.Data1 ^= handle;
